@@ -10,25 +10,33 @@ jobs:
       matrix:
         node: ['latest']
         os: [ubuntu-latest,windows-latest,macOS-latest]
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-
       - name: Use Node ${{ 'latest' }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ 'latest' }}
-
       - name: Install dependencies cache
         uses: bahmutov/npm-install@v4
-
       - name: Test
         run: yarn test --ci --coverage --maxWorkers=min
-
+name: size
+on: [pull_request]
+jobs:
+  size:
+    runs-on: ubuntu-latest
+    contents: read
+  pull-requests: write
+    env:
+      CI_JOB_NUMBER: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: andresz1/size-limit-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Build
         run: yarn build
-
       - name: Cache dependencies
         uses: actions/cache@v4
         with:
