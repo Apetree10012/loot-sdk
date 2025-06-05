@@ -1,30 +1,37 @@
 name: CI
 on: [push]
+
 jobs:
   build:
-   contents: read
-  pull-requests: write
-  name: Build, lint, and test on Node ${{ matrix.node }} and ${{ matrix.os }}
-  runs-on: ubuntu-latest
+    name: Build, lint, and test on Node ${{ matrix.node }} and ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        node: ['latest']
+        node: ['10.x', '12.x', '14.x', 'latest']
         os: [ubuntu-latest, windows-latest, macOS-latest]
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
-        
+
       - name: Use Node ${{ matrix.node }}
         uses: actions/setup-node@v1
         with:
-          node-version: ${{ 'latest' }}
-      - name: Install deps and build
+          node-version: ${{ matrix.node }}
+
+      - name: Install dependencies (with cache)
         uses: bahmutov/npm-install@v1
+
       - name: Test
         run: yarn test --ci --coverage --maxWorkers=2
-      - name: Build yarn
-      - uses: actions/cache@v3 
-  id: cache
-  with:
-    path: path/to/dependencies
-    key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
+
+      - name: Build
+        run: yarn build
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            ~/.cache/yarn
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
