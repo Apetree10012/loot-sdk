@@ -2,8 +2,9 @@ name: CI
 on: [push]
 jobs:
   build:
-    name: Build, lint, and test on Node ${{ matrix.node }} and ${{ matrix.os }}
-
+   contents: read
+  pull-requests: write
+  name: Build, lint, and test on Node ${{ matrix.node }} and ${{ matrix.os }}
     runs-on: [ubuntu-latest, windows-latest, macOS-latest]
     strategy:
       matrix:
@@ -12,6 +13,7 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
+        
       - name: Use Node ${{ matrix.node }}
         uses: actions/setup-node@v1
         with:
@@ -22,7 +24,7 @@ jobs:
         run: yarn test --ci --coverage --maxWorkers=2
       - name: Build yarn
       - uses: actions/cache@v3 
-    id: cache
-      with:
+  id: cache
+  with:
     path: path/to/dependencies
     key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
